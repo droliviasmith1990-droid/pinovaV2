@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { validateSafeHost } from '@/lib/security/ssrf';
 
 /**
  * GET /api/proxy-image?url=...
@@ -32,6 +33,26 @@ export async function GET(request: NextRequest) {
                 { error: 'Only HTTP/HTTPS URLs allowed' },
                 { status: 400 }
             );
+        }
+
+        // SSRF Protection: Validate hostname
+        try {
+            await validateSafeHost(parsedUrl.hostname);
+        } catch (validationError) {
+             const message = validationError instanceof Error ? validationError.message : 'Invalid host';
+             // If resolution fails or it's a private IP
+             if (message.includes('forbidden')) {
+                 console.warn(`[proxy-image] SSRF attempt blocked: ${url} -> ${message}`);
+                 return NextResponse.json(
+                     { error: 'Access to internal resources is forbidden' },
+                     { status: 403 }
+                 );
+             }
+             // DNS failures
+             return NextResponse.json(
+                 { error: 'Failed to resolve host' },
+                 { status: 400 }
+             );
         }
 
         // Fetch with timeout to prevent hanging requests

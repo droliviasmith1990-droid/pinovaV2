@@ -1,0 +1,192 @@
+'use client';
+
+import React from 'react';
+import {
+    Bold,
+    Italic,
+    Underline,
+    AlignLeft,
+    AlignCenter,
+    AlignRight,
+} from 'lucide-react';
+import { useEditorStore } from '@/stores/editorStore';
+import { cn } from '@/lib/utils';
+import { TextElement as TextElementType } from '@/types/editor';
+import { FontPicker } from '@/components/panels/FontPicker';
+
+
+
+export function Toolbar() {
+    // Selection from editorStore (consolidated)
+    const selectedIds = useEditorStore((s) => s.selectedIds);
+    const selectedId = selectedIds[0] || null;
+
+    // Elements from editorStore (consolidated)
+    const elements = useEditorStore((s) => s.elements);
+    const updateElement = useEditorStore((s) => s.updateElement);
+
+    // History
+    const pushHistory = useEditorStore((s) => s.pushHistory);
+
+    const selectedElement = elements.find((el) => el.id === selectedId);
+    const isTextSelected = selectedElement?.type === 'text';
+    const textElement = isTextSelected ? (selectedElement as TextElementType) : null;
+
+    const toggleStyle = (style: 'bold' | 'italic') => {
+
+        if (!textElement) return;
+        const current = textElement.fontStyle || 'normal';
+        let newStyle: string = 'normal';
+
+        if (style === 'bold') {
+            newStyle = current.includes('bold')
+                ? current.replace('bold', '').trim() || 'normal'
+                : current === 'normal' ? 'bold' : 'bold italic';
+        } else {
+            newStyle = current.includes('italic')
+                ? current.replace('italic', '').trim() || 'normal'
+                : current === 'normal' ? 'italic' : 'bold italic';
+        }
+
+        updateElement(textElement.id, { fontStyle: newStyle as 'normal' | 'bold' | 'italic' | 'bold italic' });
+        pushHistory();
+    };
+
+    return (
+        <div className="h-12 bg-white border-b border-gray-200 flex items-center px-3 gap-1 flex-shrink-0" data-testid="toolbar">
+
+            {/* Text Tools - only when text selected */}
+            {isTextSelected && textElement && (
+                <>
+
+
+
+                    {/* Font Picker */}
+                    <FontPicker
+                        currentFont={textElement.fontFamily}
+                        onFontChange={(font) => {
+                            updateElement(textElement.id, { fontFamily: font });
+                            pushHistory();
+                        }}
+                    />
+
+                    {/* Font Size */}
+                    <div className="relative group">
+                        <input
+                            type="number"
+                            value={textElement.fontSize}
+                            onChange={(e) => {
+                                updateElement(textElement.id, { fontSize: parseInt(e.target.value) || 12 });
+                                pushHistory();
+                            }}
+                            className="h-8 w-12 px-1 border border-gray-300 rounded text-xs text-center transition-all bg-white"
+                            min={8}
+                            max={200}
+                            title="Font size"
+                        />
+                    </div>
+
+                    {/* Bold/Italic/Underline */}
+                    <IconButton
+                        onClick={() => toggleStyle('bold')}
+                        icon={Bold}
+                        label="Bold"
+                        active={textElement.fontStyle?.includes('bold')}
+                    />
+                    <IconButton
+                        onClick={() => toggleStyle('italic')}
+                        icon={Italic}
+                        label="Italic"
+                        active={textElement.fontStyle?.includes('italic')}
+                    />
+                    <IconButton
+                        onClick={() => {
+                            const newDecor = textElement.textDecoration === 'underline' ? '' : 'underline';
+                            updateElement(textElement.id, { textDecoration: newDecor });
+                            pushHistory();
+                        }}
+                        icon={Underline}
+                        label="Underline"
+                        active={textElement.textDecoration === 'underline'}
+                    />
+
+                    {/* Alignment */}
+                    <IconButton
+                        onClick={() => { updateElement(textElement.id, { align: 'left' }); pushHistory(); }}
+                        icon={AlignLeft}
+                        label="Left"
+                        active={textElement.align === 'left'}
+                    />
+                    <IconButton
+                        onClick={() => { updateElement(textElement.id, { align: 'center' }); pushHistory(); }}
+                        icon={AlignCenter}
+                        label="Center"
+                        active={textElement.align === 'center'}
+                    />
+                    <IconButton
+                        onClick={() => { updateElement(textElement.id, { align: 'right' }); pushHistory(); }}
+                        icon={AlignRight}
+                        label="Right"
+                        active={textElement.align === 'right'}
+                    />
+
+                    {/* Color */}
+                    <div className="flex items-center h-8 px-1 border border-gray-300 rounded">
+                        <input
+                            type="color"
+                            value={textElement.fill}
+                            onChange={(e) => {
+                                updateElement(textElement.id, { fill: e.target.value });
+                                pushHistory();
+                            }}
+                            className="w-5 h-5 cursor-pointer border-none"
+                        />
+                        <span className="text-xs text-gray-500 ml-1">Color</span>
+                    </div>
+
+                    <Separator />
+                </>
+            )}
+        </div>
+    );
+}
+
+// Compact icon button
+function IconButton({
+    onClick,
+    icon: Icon,
+    label,
+    disabled = false,
+    active = false,
+    withText = false
+}: {
+    onClick: () => void;
+    icon: React.ComponentType<{ className?: string }>;
+    label: string;
+    disabled?: boolean;
+    active?: boolean;
+    withText?: boolean;
+}) {
+    return (
+        <button
+            onClick={onClick}
+            disabled={disabled}
+            title={label}
+            className={cn(
+                "flex items-center justify-center gap-1.5 h-7 rounded-md border text-xs transition-all duration-150 font-medium",
+                withText ? "px-2.5" : "w-7",
+                active
+                    ? "bg-blue-50 border-blue-400 text-blue-600"
+                    : "border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 active:scale-95",
+                disabled && "opacity-40 cursor-not-allowed hover:bg-white hover:border-gray-200 transform-none"
+            )}
+        >
+            <Icon className="w-4 h-4" />
+            {withText && <span className="hidden sm:inline">{label}</span>}
+        </button>
+    );
+}
+
+function Separator() {
+    return <div className="h-6 w-px bg-gray-300 mx-1" />;
+}

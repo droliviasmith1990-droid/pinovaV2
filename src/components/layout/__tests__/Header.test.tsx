@@ -3,7 +3,30 @@
  */
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { Header } from '../Header';
+
+// Mock Supabase to avoid validation error
+jest.mock('@/lib/supabase', () => ({
+    supabase: {
+        auth: {
+            getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'test-user' } }, error: null }),
+        },
+    },
+    isSupabaseConfigured: () => true,
+    getCurrentUserId: () => Promise.resolve('test-user'),
+}));
+
+// Mock db/templates.ts to avoid nanoid import issue
+jest.mock('@/lib/db/templates', () => ({
+    saveTemplate: jest.fn(),
+    checkTemplateNameExists: jest.fn().mockResolvedValue({ exists: false }),
+}));
+
+// Mock CanvaImportModal to avoid nanoid import
+jest.mock('@/components/import/CanvaImportModal', () => ({
+    CanvaImportModal: () => <div data-testid="canva-import-modal" />,
+}));
 
 // Mock dependencies
 jest.mock('lucide-react', () => ({

@@ -6,7 +6,7 @@ const config = {
     moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/src/$1',
     },
-    testMatch: ['**/__tests__/**/*.test.ts'],
+    testMatch: ['**/__tests__/**/*.test.{ts,tsx}'],
     transform: {
         '^.+\\.tsx?$': ['ts-jest', {
             tsconfig: 'tsconfig.json',
@@ -14,7 +14,7 @@ const config = {
     },
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
     transformIgnorePatterns: [
-        'node_modules/(?!(fabric)/)',
+        'node_modules/(?!(fabric|nanoid)/)',
     ],
 };
 

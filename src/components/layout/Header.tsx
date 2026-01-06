@@ -164,8 +164,9 @@ export function Header() {
                 <div className="flex items-center gap-4 flex-1">
                     <a
                         href="/dashboard"
-                        className="group flex items-center justify-center w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        className="group flex items-center justify-center w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-creative"
                         title="Back to Dashboard"
+                        aria-label="Back to Dashboard"
                     >
                         <span className="material-symbols-outlined text-gray-500 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white transition-colors">arrow_back</span>
                     </a>
@@ -195,12 +196,13 @@ export function Header() {
                 {/* Right: Actions */}
                 <div className="flex items-center gap-3">
                      {/* Preview Toggle */}
-                     <label className="hidden lg:flex items-center gap-2 cursor-pointer select-none px-3 py-1.5 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                     <label className="hidden lg:flex items-center gap-2 cursor-pointer select-none px-3 py-1.5 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors focus-within:ring-2 focus-within:ring-primary-creative/50">
                         <input
                             type="checkbox"
                             checked={previewMode}
                             onChange={(e) => setPreviewMode(e.target.checked)}
                             className="sr-only peer"
+                            aria-label="Toggle preview mode"
                         />
                          <span className="material-symbols-outlined text-gray-400 peer-checked:text-primary-creative transition-colors text-xl">visibility</span>
                         <span className={cn("text-sm font-medium transition-colors", previewMode ? "text-primary-creative" : "text-gray-500")}>Preview</span>
@@ -245,15 +247,19 @@ export function Header() {
                     {/* Settings */}
                     <a
                         href="/settings"
-                        className="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center transition-colors"
+                        className="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-primary-creative"
                         title="Settings"
+                        aria-label="Settings"
                     >
                         <Settings className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                     </a>
 
                     {/* User Menu */}
                      <div className="pl-1">
-                        <button className="w-9 h-9 rounded-full bg-linear-to-br from-purple-500 to-pink-500 border-2 border-white dark:border-gray-900 shadow-sm cursor-pointer flex items-center justify-center text-white font-bold text-xs transition-transform hover:scale-105 active:scale-95">
+                        <button
+                            className="w-9 h-9 rounded-full bg-linear-to-br from-purple-500 to-pink-500 border-2 border-white dark:border-gray-900 shadow-sm cursor-pointer flex items-center justify-center text-white font-bold text-xs transition-transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary-creative"
+                            aria-label="User Profile"
+                        >
                                 {currentUser?.email?.[0].toUpperCase() || 'G'}
                         </button>
                     </div>
